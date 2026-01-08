@@ -1,0 +1,13 @@
+# Core dependencies
+kafka-python==2.2.15
+Faker==22.0.0
+
+# Utilities
+python-dotenv==1.0.0
+
+# Para logs estruturados (opcional)
+structlog==24.1.0
+
+# Para testes (opcional)
+pytest==7.4.3
+pytest-mock==3.12.0
