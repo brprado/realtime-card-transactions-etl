@@ -6,7 +6,7 @@ import random
 from datetime import datetime, timedelta
 import time
 from dotenv import load_dotenv
-
+import os
 load_dotenv()
 
 fake = Faker("pt_Br")
@@ -25,7 +25,7 @@ class TransactionProducer:
             compression_type="gzip",  # reduz o tamanho das mensagens
             # Permite até 5 requisições paralelas por broker sem esperar ACK
             max_in_flight_requests_per_connection=5,
-            enable_idempotence=True,  # evita duplicatas
+            # enable_idempotence=True,  # evita duplicatas
         )
 
     def generate_transactions(self, is_fraud=False):
@@ -63,7 +63,7 @@ class TransactionProducer:
                 "lat": float(fake.latitude()),
                 "lon": float(fake.longitude())
             },
-            "device_id": uuid.uuid4(),
+            "device_id": str(uuid.uuid4()),
             "is_fraud": is_fraud
         }
 
@@ -83,17 +83,17 @@ class TransactionProducer:
         rate_per_second: transações por segundo
         duration_minutes: duração em minutos (None = infinito)
         """
-        start_time = datetime.now()
+        start_time = time.time()
         count = 0
 
         try:
             while True:
                 # 3-5% chance de fraude
-                is_fraud = random.ramdom() < 0.04
+                is_fraud = random.random() < 0.04
 
                 transaction = self.generate_transactions(is_fraud=is_fraud)
                 self.send_transaction(transaction)
-
+                print(transaction['transaction_id'])
                 count += 1
 
                 if count % 100 == 0:
@@ -116,4 +116,4 @@ class TransactionProducer:
 
 if __name__ == '__main__':
     producer = TransactionProducer()
-    produce.produce_transactions(rate_per_second=2)
+    producer.produce_transactions(rate_per_second=2)

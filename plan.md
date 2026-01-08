@@ -3,26 +3,31 @@
 Aqui está um planejamento completo estruturado em sprints de 2 semanas para você se nortear:
 
 ## Fase 1 Setup inicial
+
 ### Tarefas
+
 - [X] Criar estrutura de pastas do projeto no VS Code
 - [X] Configurar docker-compose.yml com Kafka, Spark, Airflow e PostgreSQL
 - [X] Testar subida de todos os containers (`docker-compose up`)
 - [X] Documentar README inicial com objetivo do projeto
 
 ### Entregável
+
 Ambiente Docker funcional com todos os serviços rodando localmente
 
-***
+---
 
 ## Fase 2: Geração de Dados (Sprint 1) - 2 semanas
 
 ### Objetivos
+
 - Criar producer fake de transações bancárias
 - Implementar ingestão no Kafka[4]
 
 ### Tarefas
+
 - [X] Instalar biblioteca Faker: `pip install faker`
-- [ ] Criar schema de dados de transação:
+- [X] Criar schema de dados de transação:
   ```python
   {
     "transaction_id": "uuid",
@@ -36,24 +41,27 @@ Ambiente Docker funcional com todos os serviços rodando localmente
     "device_id": "string"
   }
   ```
-- [ ] Desenvolver `kafka/producers/transaction_producer.py`[5]
-- [ ] Criar tópico Kafka: `transactions_raw`
-- [ ] Implementar lógica de geração com padrões normais e anomalias (3-5% de fraude)
+- [X] Desenvolver `kafka/producers/transaction_producer.py`[5]
+- [X] Criar tópico Kafka: `transactions_raw`
+- [X] Implementar lógica de geração com padrões normais e anomalias (3-5% de fraude)
 - [ ] Testar producer enviando 100-1000 transações/segundo
 - [ ] Criar consumer simples para validar dados no Kafka
 
 ### Entregável
+
 Producer Python gerando transações fake e publicando no Kafka continuamente
 
-***
+---
 
 ## Fase 3: Camada Bronze - Raw Data (Sprint 2) - 2 semanas
 
 ### Objetivos
+
 - Implementar ingestão Spark Streaming[6][4]
 - Salvar dados brutos em formato Delta/Parquet
 
 ### Tarefas
+
 - [ ] Criar job `spark/apps/bronze_ingestion.py`
 - [ ] Configurar Spark para ler do Kafka:
   ```python
@@ -70,17 +78,20 @@ Producer Python gerando transações fake e publicando no Kafka continuamente
 - [ ] Testar recuperação de falhas (simular crash do Spark)
 
 ### Entregável
+
 Pipeline Bronze salvando dados brutos em Delta com checkpoint funcional
 
-***
+---
 
 ## Fase 4: Camada Silver - Limpeza e Enriquecimento (Sprint 3) - 2 semanas
 
 ### Objetivos
+
 - Implementar transformações e validações[7][4]
 - Criar features para detecção de fraude
 
 ### Tarefas
+
 - [ ] Criar job `spark/apps/silver_transformation.py`
 - [ ] Implementar validações:
   - Remover duplicatas por transaction_id
@@ -99,17 +110,20 @@ Pipeline Bronze salvando dados brutos em Delta com checkpoint funcional
 - [ ] Salvar em `data/silver/transactions_cleaned/`
 
 ### Entregável
+
 Pipeline Silver com dados limpos, validados e enriquecidos com features
 
-***
+---
 
 ## Fase 5: Camada Gold - Agregações e Analytics (Sprint 4) - 2 semanas
 
 ### Objetivos
+
 - Criar tabelas agregadas para análise[4]
 - Implementar métricas de negócio
 
 ### Tarefas
+
 - [ ] Criar job `spark/apps/gold_aggregations.py`
 - [ ] Implementar agregações por janela de tempo:
   - Volume de transações por hora/dia
@@ -126,17 +140,20 @@ Pipeline Silver com dados limpos, validados e enriquecidos com features
   - Verificar consistência de valores agregados
 
 ### Entregável
+
 Camadas Gold com métricas de negócio prontas para consumo
 
-***
+---
 
 ## Fase 6: Orquestração com Airflow (Sprint 5) - 2 semanas
 
 ### Objetivos
+
 - Automatizar pipeline end-to-end[3][8]
 - Implementar scheduling e monitoramento
 
 ### Tarefas
+
 - [ ] Criar DAG `airflow/dags/banking_pipeline_dag.py`
 - [ ] Implementar tasks:
   ```python
@@ -154,17 +171,20 @@ Camadas Gold com métricas de negócio prontas para consumo
 - [ ] Documentar cada task no DAG
 
 ### Entregável
+
 Pipeline completo orquestrado pelo Airflow rodando automaticamente
 
-***
+---
 
 ## Fase 7: Monitoramento e Qualidade (Sprint 6) - 1 semana
 
 ### Objetivos
+
 - Implementar observabilidade[10]
 - Garantir data quality[7]
 
 ### Tarefas
+
 - [ ] Adicionar logs estruturados em cada job Spark
 - [ ] Criar métricas customizadas no Airflow:
   - Tempo de processamento por layer
@@ -178,9 +198,10 @@ Pipeline completo orquestrado pelo Airflow rodando automaticamente
 - [ ] Documentar arquitetura com diagrama (draw.io ou Mermaid)
 
 ### Entregável
+
 Sistema de monitoramento e dashboard funcional
 
-***
+---
 
 ## Fluxo de Dados Completo
 
@@ -223,7 +244,7 @@ Sistema de monitoramento e dashboard funcional
     ↑ Orquestrado por Airflow DAG ↑
 ```
 
-***
+---
 
 ## Estimativas de Tempo Total
 
@@ -234,4 +255,3 @@ Sistema de monitoramento e dashboard funcional
 - Sprint 4 (Gold): 2 semanas
 - Sprint 5 (Airflow): 2 semanas
 - Sprint 6 (Monitoring): 1 semana
-
