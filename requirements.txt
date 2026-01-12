@@ -1,7 +1,7 @@
 # Core dependencies
 kafka-python==2.2.15
 Faker==22.0.0
-pyspark==4.1.0
+pyspark==4.1.1
 # Utilities
 python-dotenv==1.0.0
 
