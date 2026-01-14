@@ -1,0 +1,39 @@
+param(
+    [Parameter(Mandatory=$true)]
+    [string]$ScriptName,
+    
+    [Parameter(Mandatory=$false)]
+    [switch]$FirstRun
+)
+
+# Se for a primeira execução, instala os JARs
+if ($FirstRun) {
+    Write-Host "Instalando JARs no container spark-master..." -ForegroundColor Yellow
+    
+    docker exec spark-master bash -c "cd /tmp && \
+        wget -q https://repo1.maven.org/maven2/org/apache/spark/spark-sql-kafka-0-10_2.12/3.5.3/spark-sql-kafka-0-10_2.12-3.5.3.jar && \
+        wget -q https://repo1.maven.org/maven2/org/apache/kafka/kafka-clients/3.5.0/kafka-clients-3.5.0.jar && \
+        wget -q https://repo1.maven.org/maven2/org/apache/spark/spark-token-provider-kafka-0-10_2.12/3.5.3/spark-token-provider-kafka-0-10_2.12-3.5.3.jar && \
+        wget -q https://repo1.maven.org/maven2/org/apache/commons/commons-pool2/2.11.1/commons-pool2-2.11.1.jar && \
+        wget -q https://repo1.maven.org/maven2/io/delta/delta-spark_2.12/3.0.0/delta-spark_2.12-3.0.0.jar && \
+        wget -q https://repo1.maven.org/maven2/io/delta/delta-storage/3.0.0/delta-storage-3.0.0.jar && \
+        wget -q https://repo1.maven.org/maven2/org/apache/hadoop/hadoop-aws/3.3.4/hadoop-aws-3.3.4.jar && \
+        wget -q https://repo1.maven.org/maven2/com/amazonaws/aws-java-sdk-bundle/1.12.262/aws-java-sdk-bundle-1.12.262.jar && \
+        echo 'JARs instalados com sucesso!'"
+    
+    if ($LASTEXITCODE -ne 0) {
+        Write-Host "Erro ao instalar JARs!" -ForegroundColor Red
+        exit 1
+    }
+    
+    Write-Host "JARs instalados com sucesso!" -ForegroundColor Green
+    Write-Host ""
+}
+
+# Executa o spark-submit
+Write-Host "Executando spark-submit para $ScriptName..." -ForegroundColor Cyan
+
+docker exec spark-master /opt/spark/bin/spark-submit `
+  --master local[*] `
+  --jars /tmp/spark-sql-kafka-0-10_2.12-3.5.3.jar,/tmp/kafka-clients-3.5.0.jar,/tmp/spark-token-provider-kafka-0-10_2.12-3.5.3.jar,/tmp/commons-pool2-2.11.1.jar,/tmp/delta-spark_2.12-3.0.0.jar,/tmp/delta-storage-3.0.0.jar,/tmp/hadoop-aws-3.3.4.jar,/tmp/aws-java-sdk-bundle-1.12.262.jar `
+  /opt/spark/apps/apps/$ScriptName
