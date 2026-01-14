@@ -95,8 +95,8 @@ Ambiente Docker funcional com todos os serviços rodando localmente, incluindo M
 - [X] Desenvolver `kafka/producers/transaction_producer.py`[5]
 - [X] Criar tópico Kafka: `transactions_raw`
 - [X] Implementar lógica de geração com padrões normais e anomalias (3-5% de fraude)
-- [ ] Testar producer enviando 100-1000 transações/segundo
-- [ ] Criar consumer simples para validar dados no Kafka
+- [X] Testar producer enviando 100-1000 transações/segundo
+- [X] Criar consumer simples para validar dados no Kafka
 
 ### Entregável
 
@@ -117,7 +117,7 @@ Producer Python gerando transações fake e publicando no Kafka continuamente
 - [X] Configurar Spark para ler do Kafka (usando porta 9093 para comunicação interna)
 - [X] Parsear JSON e adicionar metadados (data de ingestão, source, kafka_timestamp)
 - [X] Configurar checkpoint para fault tolerance[6]
-- [ ] Configurar Spark para usar Delta Lake e MinIO:
+- [X] Configurar Spark para usar Delta Lake e MinIO:
   ```python
   # Configurar acesso ao MinIO como S3
   spark.conf.set("spark.hadoop.fs.s3a.endpoint", "http://minio:9000")
@@ -125,19 +125,19 @@ Producer Python gerando transações fake e publicando no Kafka continuamente
   spark.conf.set("spark.hadoop.fs.s3a.secret.key", "minioadmin")
   spark.conf.set("spark.hadoop.fs.s3a.path.style.access", "true")
   spark.conf.set("spark.hadoop.fs.s3a.impl", "org.apache.hadoop.fs.s3a.S3AFileSystem")
-  
+
   # Habilitar Delta Lake
   spark.conf.set("spark.sql.extensions", "io.delta.sql.DeltaSparkSessionExtension")
   spark.conf.set("spark.sql.catalog.spark_catalog", "org.apache.spark.sql.delta.catalog.DeltaCatalog")
   ```
-- [ ] Adicionar dependências Delta Lake ao spark-submit:
+- [X] Adicionar dependências Delta Lake ao spark-submit:
   ```bash
   --packages io.delta:delta-spark_2.12:3.0.0,org.apache.hadoop:hadoop-aws:3.3.4,com.amazonaws:aws-java-sdk-bundle:1.12.262
   ```
-- [ ] Salvar em `s3a://bronze/transactions/` como Delta Lake
-- [ ] Implementar particionamento por categoria (ou data: year/month/day)
-- [ ] Testar recuperação de falhas (simular crash do Spark)
-- [ ] Verificar dados no MinIO Console (http://localhost:9001)
+- [X] Salvar em `s3a://bronze/transactions/` como Delta Lake
+- [X] Implementar particionamento por categoria (ou data: year/month/day)
+- [X] Testar recuperação de falhas (simular crash do Spark)
+- [X] Verificar dados no MinIO Console (http://localhost:9001)
 
 ### Entregável
 
