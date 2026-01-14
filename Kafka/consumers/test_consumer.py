@@ -8,13 +8,25 @@ import sys
 load_dotenv()
 
 
+def clean_env_value(value):
+    """Remove aspas simples ou duplas do início e fim do valor"""
+    if value:
+        return value.strip().strip("'").strip('"')
+    return value
+
+
 class RealtimeTransactionConsumer:
     def __init__(self, topic='transactions_raw'):
         self.topic = topic
         self.running = True
+        
+        # Obter e limpar o valor do KAFKA_SERVER
+        kafka_server = os.getenv('KAFKA_SERVER', 'localhost:9092')
+        bootstrap_servers = clean_env_value(kafka_server)
+        
         self.consumer = KafkaConsumer(
             topic,
-            bootstrap_servers=os.getenv('KAFKA_SERVER'),
+            bootstrap_servers=bootstrap_servers,
             auto_offset_reset='latest',  # Começa das mensagens novas
             value_deserializer=lambda m: json.loads(m.decode('utf-8')),
             group_id='transaction-consumer-group',  # Grupo para rastrear offset

@@ -1,6 +1,5 @@
 from pyspark.sql import SparkSession
 
-# Criar SparkSession
 spark = SparkSession.builder \
     .appName("TestSpark") \
     .master("local[*]") \

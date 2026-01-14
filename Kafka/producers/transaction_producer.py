@@ -1,4 +1,5 @@
 from kafka import KafkaProducer
+from kafka.errors import NoBrokersAvailable
 from faker import Faker
 import json
 import uuid
@@ -7,26 +8,79 @@ from datetime import datetime, timedelta
 import time
 from dotenv import load_dotenv
 import os
+import sys
+from pathlib import Path
+
+# Adicionar o diretório raiz do projeto ao path
+root_dir = Path(__file__).parent.parent.parent
+sys.path.insert(0, str(root_dir))
+
+# Carregar variáveis de ambiente primeiro
 load_dotenv()
+
+from Kafka.scripts.create_topic import create_kakfa_topic
 
 fake = Faker("pt_Br")
 
 
+def clean_env_value(value):
+    """Remove aspas simples ou duplas do início e fim do valor"""
+    if value:
+        return value.strip().strip("'").strip('"')
+    return value
+
+
 class TransactionProducer:
-    def __init__(self, bootstrap_servers=os.getenv('KAFKA_SERVER'), topic="transactions_raw"):
+    def __init__(self, bootstrap_servers=None, topic="transactions_raw"):
+        # Usar valor padrão se não fornecido
+        if bootstrap_servers is None:
+            kafka_server = os.getenv('KAFKA_SERVER', 'localhost:9092')
+            bootstrap_servers = clean_env_value(kafka_server)
+        
         self.topic = topic
-        self.producer = KafkaProducer(
-            bootstrap_servers=bootstrap_servers,
-            # converte dicionario python em uma string JSON
-            value_serializer=lambda v: json.dumps(v).encode("utf-8"),
-            # nivel de confirmacao máximo (aguarda que o lider e todas as replicas receberam e gravaram as mensagens)
-            acks="all",
-            retries=3,
-            compression_type="gzip",  # reduz o tamanho das mensagens
-            # Permite até 5 requisições paralelas por broker sem esperar ACK
-            max_in_flight_requests_per_connection=5,
-            # enable_idempotence=True,  # evita duplicatas
-        )
+        self.bootstrap_servers = bootstrap_servers
+        
+        # Tentar criar o tópico antes de criar o producer
+        try:
+            create_kakfa_topic(topic_name=topic)
+        except Exception as e:
+            print(f"⚠️  Aviso: Não foi possível criar o tópico automaticamente: {e}")
+            print("   Continuando mesmo assim...")
+        
+        # Criar o producer com tratamento de erro
+        try:
+            self.producer = KafkaProducer(
+                bootstrap_servers=bootstrap_servers,
+                # converte dicionario python em uma string JSON
+                value_serializer=lambda v: json.dumps(v).encode("utf-8"),
+                # nivel de confirmacao máximo (aguarda que o lider e todas as replicas receberam e gravaram as mensagens)
+                acks="all",
+                retries=3,
+                compression_type="gzip",  # reduz o tamanho das mensagens
+                # Permite até 5 requisições paralelas por broker sem esperar ACK
+                max_in_flight_requests_per_connection=5,
+                # enable_idempotence=True,  # evita duplicatas
+            )
+            print(f"✅ Producer conectado ao Kafka em {bootstrap_servers}")
+        except NoBrokersAvailable:
+            error_msg = f"""
+❌ ERRO: Não foi possível conectar ao Kafka!
+
+O Kafka não está disponível em: {bootstrap_servers}
+
+Soluções:
+1. Verifique se o Kafka está rodando:
+   docker-compose up -d kafka zookeeper
+
+2. Verifique se o Kafka está acessível:
+   docker ps | grep kafka
+
+3. Verifique a configuração no arquivo .env:
+   KAFKA_SERVER=localhost:9092
+
+4. Aguarde alguns segundos após iniciar o Kafka para ele ficar pronto
+"""
+            raise ConnectionError(error_msg) from None
 
     def generate_transactions(self, is_fraud=False):
         """
