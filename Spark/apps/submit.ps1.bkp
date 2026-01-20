@@ -8,11 +8,6 @@ param(
 
 # Se for a primeira execução, instala os JARs e os pacotes Python necessários
 if ($FirstRun) {
-
-
-    Write-Host "Instalando pacotes Python no container spark-master..." -ForegroundColor Yellow
-    docker exec -u root spark-master pip install delta-spark==3.0.0
-
     Write-Host "Instalando JARs no container spark-master..." -ForegroundColor Yellow
     
     docker exec spark-master bash -c "cd /tmp && \
@@ -20,7 +15,7 @@ if ($FirstRun) {
         wget -q https://repo1.maven.org/maven2/org/apache/kafka/kafka-clients/3.5.0/kafka-clients-3.5.0.jar && \
         wget -q https://repo1.maven.org/maven2/org/apache/spark/spark-token-provider-kafka-0-10_2.12/3.5.3/spark-token-provider-kafka-0-10_2.12-3.5.3.jar && \
         wget -q https://repo1.maven.org/maven2/org/apache/commons/commons-pool2/2.11.1/commons-pool2-2.11.1.jar && \
-        wget -q https://repo1.maven.org/maven2/io/delta/delta-spark_2.12/3.0.0/delta-spark_2.12-3.0.0.jar && \
+        wget -q https://repo1.maven.org/maven2/io/delta/delta-spark_2.12/3.0.0/delta-spark_2_12-3.0.0.jar && \
         wget -q https://repo1.maven.org/maven2/io/delta/delta-storage/3.0.0/delta-storage-3.0.0.jar && \
         wget -q https://repo1.maven.org/maven2/org/apache/hadoop/hadoop-aws/3.3.4/hadoop-aws-3.3.4.jar && \
         wget -q https://repo1.maven.org/maven2/com/amazonaws/aws-java-sdk-bundle/1.12.262/aws-java-sdk-bundle-1.12.262.jar && \
@@ -35,7 +30,9 @@ if ($FirstRun) {
     Write-Host ""
     
     # Instala pacotes Python necessários
+    Write-Host "Instalando pacotes Python no container spark-master..." -ForegroundColor Yellow
     
+    docker exec spark-master pip install delta-spark==3.0.0
     
     if ($LASTEXITCODE -ne 0) {
         Write-Host "Erro ao instalar pacotes Python!" -ForegroundColor Red

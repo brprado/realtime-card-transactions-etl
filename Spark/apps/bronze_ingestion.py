@@ -59,6 +59,7 @@ df = spark.readStream \
     .option("kafka.bootstrap.servers", "kafka:9093") \
     .option("subscribe", "transactions_raw") \
     .option("startingOffsets", "latest") \
+    .option("failOnDataLoss", "false") \
     .load()
 
 ############################################################################ 
